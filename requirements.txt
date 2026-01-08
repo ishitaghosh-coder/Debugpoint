@@ -1,0 +1,7 @@
+streamlit==1.32.0
+qdrant-client==1.8.0
+ollama==0.1.7
+docling==1.0.2
+pydantic==2.6.4
+python-dotenv==1.0.1
+moviepy==1.0.3
