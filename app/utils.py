@@ -35,3 +35,12 @@ def clean_markdown_table(raw_text: str) -> str:
     """Requirement 1: Structural cleanup for text extracted from scans/PDFs."""
     # Logic to ensure tables extracted by Docling are readable by the LLM
     return raw_text.strip().replace("\n\n", "\n")
+def format_sources(points):
+    # Requirement 5: Clearly reference sources [cite: 14]
+    return "\n".join([f"- [{p.payload['source']}] ({p.payload['type']})" for p in points])
+
+def get_confidence_warning(score):
+    # Requirement 6: Acknowledge uncertainty [cite: 15]
+    if score < 0.7:
+        return "⚠️ Disclaimer: Response based on low-confidence or inferred data."
+    return ""
