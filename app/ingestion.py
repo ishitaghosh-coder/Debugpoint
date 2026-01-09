@@ -1,32 +1,20 @@
 import os
 from docling.document_converter import DocumentConverter
 from qdrant_client import QdrantClient
-from qdrant_client.models import PointStruct, VectorParams, Distance
 
 class IngestionEngine:
     def __init__(self):
+        # Path creates a local folder; no Docker server needed
+        self.qdrant = QdrantClient(path="local_database_storage")
         self.converter = DocumentConverter()
-        self.qdrant = QdrantClient(url=os.getenv("QDRANT_HOST", "http://qdrant:6333"))
-        self._setup_collection()
-
-    def _setup_collection(self):
-        """Mandatory: Unified Multimodal Storage"""
-        if not self.qdrant.collection_exists("knowledge_base"):
-            self.qdrant.create_collection(
-                collection_name="knowledge_base",
-                vectors_config=VectorParams(size=768, distance=Distance.COSINE)
-            )
 
     def process_file(self, file_path):
-        """Converts heterogeneous data into searchable chunks"""
         result = self.converter.convert(file_path)
-        # Structural parsing: captures tables/images as markdown
         content = result.document.export_to_markdown()
         
-        # In a real setup, use an embedding model here
-        # For prototype, we simulate indexing
-        self.qdrant.upsert(
+        # Metadata fulfills Requirement 5 (Citations)
+        self.qdrant.add(
             collection_name="knowledge_base",
-            points=[PointStruct(id=1, vector=[0.1]*768, payload={"text": content})]
+            documents=[content],
+            metadata=[{"source": os.path.basename(file_path), "type": "multimodal"}]
         )
-        return "File Indexed Successfully"
